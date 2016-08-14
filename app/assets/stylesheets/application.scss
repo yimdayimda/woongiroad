@@ -1,0 +1,24 @@
+@import "materialize";
+
+
+.modal { max-height: 80% !important }
+
+@media screen and (max-width: 2000px){
+    .tr-logo{max-width: 100%; width:400px; height:auto;padding-top:10px;}
+}
+
+@media screen and (max-width: 500px){
+    .tr-logo{max-width: 100%; width:600px; height:auto;}
+}
+
+// soya_godun10
+@font-face {
+    font-family: 'soya_godun10';
+    src: asset-url('/assets/soya_godun10.eot');
+    src: asset-url('/assets/soya_godun10.eot?#iefix') format('embedded-opentype'),
+          asset-url('/assets/soya_godun10.woff') format('woff'),
+          asset-url('/assets/soya_godun10.ttf') format('truetype'),
+          asset-url('/assets/soya_godun10.svg#action_manregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>트레이너스로드</title>
+  
+  <!--기본적으로 들어있는 것-->
+  <%= stylesheet_link_tag    'application', media: 'all' %>
+  <%= javascript_include_tag 'application' %>
+  <%= csrf_meta_tags %>
+  
+  <!--모바일 화면 최적화-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  
+  <!--얘는 어디서 왔니..-->
+  <!--<script src="https://maps.google.com/maps/api/js?sensor=false"></script>-->
+  
+  <!--네이버 검색 등록-->
+  <meta name="naver-site-verification" content="bc1f149e0bf4939dd44040a28a2505a4ff3611b9"/>
+  <meta name="description" content="모든 트레이너들의 모험 필수템! 트레이너스로드!">  
+    
+  <!--맵 현재위치 추적 버튼 js-->
+  <script type="text/javascript" src="/assets/map.js"></script>
+ 
+  <!--웹페이지 아이콘-->
+  <link rel="icon" href="/assets/logo_test2-01.png">
+
+  <!--바로가기 아이콘 script-->
+  <script> 
+  var userAgent = navigator.userAgent.toLowerCase(); // 접속 핸드폰 정보 
+     
+  모바일 홈페이지 바로가기 링크 생성 
+  if(userAgent.match('iphone')) { 
+      document.write('<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-barstyle" content="black-translucent"><link rel="apple-touch-icon" href="/assets/logo_test1-01.png" />') 
+  } else if(userAgent.match('ipad')) { 
+      document.write('<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-barstyle" content="black-translucent"><link rel="apple-touch-icon" sizes="72*72" href="/assets/logo_test1-01.png" />') 
+  } else if(userAgent.match('ipod')) { 
+      document.write('<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-barstyle" content="black-translucent"><link rel="apple-touch-icon" href="/assets/logo_test1-01.png" />') 
+  } else if(userAgent.match('android')) { 
+      document.write('<meta name="mobile-web-app-capable" content="yes"><link rel="shortcut icon" href="/assets/logo_test2-01.png" />') 
+  } 
+  </script>
+
+
+  <!--구글 애널리틱스-->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  
+    ga('create', 'UA-80267324-3', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <style type="text/css">
+    html, body { 
+      font-family: 'soya_godun10';
+      height: 100%; margin: 0; padding: 0;
+      
+    }
+    #map { height: 90%; }
+  </style>
+  
+</head>
+<body>
+
+<%= render 'layouts/navbar' %>
+
+<%= yield %>
+
+</body>
+
+
+</html>

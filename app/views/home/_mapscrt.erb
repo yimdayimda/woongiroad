@@ -1,0 +1,270 @@
+<script>
+// 지도 생성 변수
+var map;
+// 모든 마커를 객체화하는 배열
+var markers = [];
+
+function initMap() {
+// 지도 중심 -> 속초
+  var haightAshbury = {lat: 38.190517, lng: 128.599078};
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 16,
+    center: haightAshbury,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    disableDefaultUI: true
+  });
+  
+  // 지도 움직일 때마다 부르는 함수
+  google.maps.event.addListener(map, 'idle', showMarkers2);
+    
+  // 지도 클릭할 때마다 부르는 함수
+  google.maps.event.addListener(map, 'click', modalDelete);
+
+  // 현재 위치 버튼 함수
+  var geoloccontrol = new klokantech.GeolocationControl(map, 16);
+  // default=16 줌 값
+  
+}
+
+// Sets the map on all markers in the array.
+function setMapOnAll(map) {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(map);
+  }
+}
+
+// Removes the markers from the map, but keeps them in the array.
+function clearMarkers() {
+  setMapOnAll(null);
+}
+
+// Shows any markers currently in the array.
+function showMarkers() {
+  setMapOnAll(map);
+}
+
+// Deletes all markers in the array by removing references to them.
+function deleteMarkers() {
+  clearMarkers();
+  markers = [];
+}
+
+// DB에 있는 모든 마커들 positions에 넣기
+var positions = [
+   <% Spot.all.each do |s| %>
+    [
+     // alert(s.num2);
+        '<%= s.name %>',
+        <%= s.latitude %>, 
+        <%= s.longitude %>,
+        <%= s.category %>
+    ],
+    <% end %>
+];
+
+// 이전의 모든 모달들 닫는 함수
+function modalDelete(){
+ $('.modal').closeModal();
+};
+
+// 클릭할때 마다 마커를 지우고 생성하는 함수
+function showMarkers2() {
+
+  // 지도 화면 좌표 가져오기
+    var bounds = map.getBounds();
+    var southWest = bounds.getSouthWest();
+    var fromlat = southWest.lat();
+    var fromlng = southWest.lng();
+    var northEast = bounds.getNorthEast();
+    var tolat = northEast.lat();
+    var tolng = northEast.lng();
+
+// 이전 모달 닫기
+ $('.modal').closeModal();
+
+
+// 이전 화면 마커들 지우기
+    deleteMarkers();
+
+
+  
+  var marker_stop = {
+    url: '/assets/map_stop.png',
+    scaledSize: new google.maps.Size(30, 30),
+    origin: new google.maps.Point(0, 0)
+  };
+  var marker_gym = {
+    url: '/assets/map_gym.png',
+    scaledSize: new google.maps.Size(30, 30),
+    origin: new google.maps.Point(0, 0)
+  };
+  var selected_marker_gym = {
+    url: '/assets/map_selected_gym.png',
+    scaledSize: new google.maps.Size(45, 45),
+    origin: new google.maps.Point(0, 0)
+  }
+  var selected_marker_stop = {
+    url: '/assets/map_selected_stop.png',
+    scaledSize: new google.maps.Size(45, 45),
+    origin: new google.maps.Point(0, 0)
+  }
+  // Shapes define the clickable region of the icon. The type defines an HTML
+  // <area> element 'poly' which traces out a polygon as a series of X,Y points.
+  // The final coordinate closes the poly by connecting to the first coordinate.
+  var shape = {
+    coords: [1, 1, 1, 20, 18, 20, 18, 1],
+    type: 'poly'
+  };
+  
+
+// 마커 생성하기
+    for (var i=0 ; i < positions.length; i++) {
+      
+      // 보고 있는 좌표 안에 있는 마커들만 생성하기
+        if (positions[i][1] > fromlat && positions[i][1] < tolat && positions[i][2] > fromlng && positions[i][2] < tolng) {
+  
+          var position = positions[i];
+          function icon_changed() {
+            if (position[3] == 1) {
+              return marker_gym;
+            } else { 
+              return marker_stop;
+            }
+          };
+          var icon = icon_changed();
+          var marker = new google.maps.Marker({
+              position: {lat: position[1], lng: position[2]},
+              map: map,
+              icon: icon,
+              draggable: false,
+              // animation: google.maps.Animation.DROP,
+              title: position[0],
+              zIndex: position[3]
+          });
+         
+
+
+      //좌표를 클릭 했을 때 모달 열고 색 바뀌게 하는 함수
+            marker.addListener('click', function() { 
+            
+            // 이전 모달 닫기
+             $('.modal_info').closeModal();
+             
+            // 이전 모달 내용 지우기
+             $(".modal_info").empty();
+            // $(".modal").attr("id","modal"+i)
+            
+            // 모달 안에 내용 채우기 
+              $(".modal_info").append($('<li/>', {
+                  class: 'modal-li',
+              }));
+              $(".modal-li").append($('<div/>', {
+                  class: 'collapsible-header',
+              }));
+              $(".collapsible-header").append('<img style="height:23px;padding-right:6px;padding-top:6px" src="/assets/formain.png">');
+              $(".collapsible-header").append($('<b/>', {
+                  text: this.title
+              }));
+              
+              
+              
+            //  모달 열기
+            $('.modal_info').openModal();
+            
+            // 모달 검정 배경 삭제하기 
+            $( ".lean-overlay" ).remove();
+            
+            
+          
+          // 클릭한 마커 이외의 모든 마커들 원래대로 바뀌게 하기 
+                for (var i = 0; i < markers.length; i++) {
+                    // 체육관 초기설정
+                    if (markers[i].zIndex == 1) {
+                      markers[i].setIcon(marker_gym);
+                    } else {
+                      markers[i].setIcon(marker_stop);
+                    }// set back to default
+                };
+                
+                // alert(this.zIndex);
+              // alert(this.position);
+              // map.setZoom(17);
+              // map.setCenter(marker.getPosition());
+              // map.setCenter(this.position);
+              
+          // 클릭한 마커만 색 바꾸기
+              if (this.zIndex == 1) {
+                // 카테고리가 1인 모든 마커를 초록색으로
+                this.setIcon(selected_marker_gym);
+              } else {
+                this.setIcon(selected_marker_stop);
+              };
+              //   marker.setMap(NULL);
+              
+            });  
+            // 클릭문 끝
+            
+            
+          // 마커 깡통에 집어 넣기
+          markers.push(marker);
+        };
+        // if문 끝
+    }
+    // for문 끝
+    
+};
+// idle문 끝
+
+    
+    // 속초 누르면 이동
+    $("#sokcho").click(function(){
+      map.setCenter({lat: 38.190517, lng: 128.599078});
+      map.setZoom(17);
+      // alert('하이');
+    });
+    
+    // 속초 누르면 이동
+    $("#m_sokcho").click(function(){
+      map.setCenter({lat: 38.190517, lng: 128.599078});
+      map.setZoom(17);
+      $('.button-collapse').sideNav('hide');
+    });
+    
+    
+    // 울산 누르면 이동
+    $("#ulsan").click(function(){
+      map.setCenter({lat: 35.3591404, lng: 129.3601572});
+      map.setZoom(17);
+    });
+    
+    
+    // 울산 누르면 이동
+    $("#m_ulsan").click(function(){
+      map.setCenter({lat: 35.3591404, lng: 129.3601572});
+      map.setZoom(17);
+      $('.button-collapse').sideNav('hide');
+    });
+
+    // 의견제안하기 누르면 모달 뜨기
+    $(".suggest").click(function(){
+      $('.modal_info').closeModal();
+      $('#qna').openModal();
+      $('.button-collapse').sideNav('hide');
+
+      // alert('하이');
+    });
+  
+    // 이용방법누르면 모달 뜨기
+    $(".guide").click(function(){
+      $('.modal_info').closeModal();
+      $('#about').openModal();
+      $('.button-collapse').sideNav('hide');
+
+      // alert('하이');
+    });
+
+    </script>
+
+<!--구글 맵 api-->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrb_gJ_hsSPhqVvu1QozU6KJf1eyogvHo&signed_in=true&callback=initMap"></script>
+    
